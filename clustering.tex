@@ -18,24 +18,26 @@
     Decision variables:
     \begin{itemize}
         \item $c_{ik} = \begin{cases}
-            1 & \text{if } a_i \in r_k\\
+            1 & \text{if } a_i \in r_k \\
             0 & \text{otherwise}
         \end{cases}, \quad c_{ik} \in \{0, 1\}$
+        \item Big $M$
     \end{itemize}
     Equations:
     \begin{align*}
-        \max & \quad objective\_function\\
-        s.t & \\
-        \phi(a_i) &= \phi^+(a_i) - \phi^-(a_i) \text{ (netflow)}\\
-        \phi^+(a_i) &= \frac{1}{n-1} \sum_{i \neq j}^{} \sum_{k}{} w_k \beta_{ijk}\\
-        \beta_{ijk} &< \frac{f_k(a_i)-f_k(a_j)}{M} + 1\\
-        \beta_{ijk} &> \frac{f_k(a_i)-f_k(a_j)}{M} - 1\\
-        \beta_{ijk} &\in \{0,1\},
+        \max z &= objective\_function\\
+        \text{s.t.} & \\
+        \phi(a_i) &= \phi^+(a_i) - \phi^-(a_i) \text{ (netflow)} \\
+        \phi^+(a_i) &= \frac{1}{n-1} \sum_{i \neq j}^{} \sum_{k}{} w_k \beta_{ijk} \\
+        \beta_{ijk} &< \frac{f_k(a_i)-f_k(a_j)}{M} + 1 \\
+        \beta_{ijk} &\geq \frac{f_k(a_i)-f_k(a_j)}{M} \\
+        \beta_{ijk} &\in \{0,1\}\\
+        c_{ik} &\in \{0, 1\} \text{ (decision variables)}
     \end{align*}
     Notes:
     \begin{itemize}
         \item $\beta_{ijk} = \begin{cases}
-            1 & \text{if } f_k(a_i) > f_k(a_j)\\
+            1 & \text{if } f_k(a_i) > f_k(a_j) \\
             0 & otherwise
         \end{cases}, \quad \beta_{ijk} \in \{0, 1\}$
     \end{itemize}
