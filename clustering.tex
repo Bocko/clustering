@@ -7,6 +7,7 @@
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{graphicx}
+\usepackage{hyperref}
 \setlength\parindent{0pt}
 
 \title{Multi-criteria hierarchical clustering}
@@ -15,13 +16,13 @@
 
 \begin{document}
     \maketitle
-    Definitions:
+    \section{Definitions}
     \begin{itemize}
-        \item $\mathcal{A}$: the set of $n$ alternatives $\mathcal{A} = \{a_1, a_2, \dots, a_n\} \quad (a_i,\, i = 1, 2, \dots, n)$
-        \item $\mathcal{F}$: the set of $m$ criteria $\mathcal{F} = \{f_1, f_2, \dots, f_m\} \quad (f_k,\, k = 1, 2, \dots, m)$
-        \item $\mathcal{R}$: the set of $l$ clusters $\mathcal{R} = \{r_1, r_2, \dots, r_l\} \quad (r_h,\, h = 1, 2, \dots, l)$
+        \item $\mathcal{A}$: the set of $n$ alternatives $\mathcal{A} = \{a_1, a_2, \dots, a_n\} \quad (\text{notation: } a_i \text{ or } a_j,\, i,j = 1, 2, \dots, n)$
+        \item $\mathcal{F}$: the set of $m$ criteria $\mathcal{F} = \{f_1, f_2, \dots, f_m\} \quad (\text{notation: } f_k,\, k = 1, 2, \dots, m)$
+        \item $\mathcal{R}$: the set of $l$ clusters $\mathcal{R} = \{r_1, r_2, \dots, r_l\} \quad (\text{notation: } r_h,\, h = 1, 2, \dots, l)$
     \end{itemize}
-    Input data:
+    \section{Input data}
     \begin{itemize}
         \item Evaluation table: \begin{tabular}{c|cccccc}
             $a$ & $f_1(\cdot)$ & $f_2(\cdot)$ & $\dots$ & $f_j(\cdot)$ & $\dots$ & $f_m(\cdot)$\\
@@ -33,9 +34,9 @@
             $\vdots$ & $\vdots$ & $\vdots$ & $\ddots$ & $\vdots$ & $\ddots$ & $\vdots$\\
             $a_n$ & $f_1(a_n)$ & $f_2(a_n)$ & $\dots$ & $f_j(a_n)$ & $\dots$ & $f_m(a_n)$\\
         \end{tabular}
-        \item $\mathcal{W}$: the set of $m$ weights for the criteria: $\mathcal{W} = \{w_1, w_2, \dots, w_m\} \quad (w_k,\, k = 1, 2, \dots, m)$
+        \item $\mathcal{W}$: the set of $m$ weights for the criteria: $\mathcal{W} = \{w_1, w_2, \dots, w_m\} \quad (\text{notation: } w_k,\, k = 1, 2, \dots, m)$
     \end{itemize}
-    Decision variables:
+    \section{Decision variables}
     \begin{itemize}
         \item $c_{ih} = \begin{cases}
             1 & \text{if } a_i \in r_h \\
@@ -43,23 +44,23 @@
         \end{cases}, \quad c_{ih} \in \{0, 1\}$
         \item Big $M$
     \end{itemize}
-    Equations:
+    \section{Equations}
     \begin{align*}
         \max z &= \pi_{} - \pi_{}\\
         \text{s.t.} & \\
-        \phi(a_i) &= \phi^+(a_i) - \phi^-(a_i) \text{ (netflow)} \\
-        \phi^+(a_i) &= \frac{1}{n-1} \sum_{i=1, i\neq j}^{n} \sum_{k=1}^{m} w_k \beta_{ijk} \\
+        \phi(a_i) &= \phi^+(a_i) - \phi^-(a_i) & \text{ (netflow)} \\
+        \phi^+(a_i) &= \frac{1}{n-1} \sum_{j=1, j\neq i}^{n} \sum_{k=1}^{m} w_k \beta_{ijk} & \text{ (positive flow)} \\
+        \beta_{ijk} &\geq \frac{f_k(a_i)-f_k(a_j)}{M} & \text{ (linearization Note \ref{note:betaijk})} \\
         \beta_{ijk} &< \frac{f_k(a_i)-f_k(a_j)}{M} + 1 \\
-        \beta_{ijk} &\geq \frac{f_k(a_i)-f_k(a_j)}{M} \\
         \beta_{ijk} &\in \{0,1\}\\
-        c_{ik} &\in \{0, 1\} \text{ (decision variables)}
+        c_{ik} &\in \{0, 1\} & \text{ (decision variables)}
     \end{align*}
-    Notes:
-    \begin{itemize}
-        \item $\beta_{ijk} = \begin{cases}
+    \section{Notes}
+    \begin{enumerate}
+        \item \label{note:betaijk}$\beta_{ijk} = \begin{cases}
             1 & \text{if } f_k(a_i) > f_k(a_j) \\
             0 & otherwise
         \end{cases}, \quad \beta_{ijk} \in \{0, 1\}$
         \item Big $M$ chosen so that $\dfrac{f_k(a_i)-f_k(a_j)}{M} \in \left]-1;1\right[$
-    \end{itemize}
+    \end{enumerate}
 \end{document}
