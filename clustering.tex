@@ -35,6 +35,7 @@
             $a_n$ & $f_1(a_n)$ & $f_2(a_n)$ & $\dots$ & $f_j(a_n)$ & $\dots$ & $f_m(a_n)$\\
         \end{tabular}
         \item $\mathcal{W}$: the set of $m$ weights for the criteria: $\mathcal{W} = \{w_1, w_2, \dots, w_m\} \quad (\text{notation: } w_k,\, k = 1, 2, \dots, m)$
+        \item Big $M$ (large value, see Note \ref{note:bigm})
     \end{itemize}
     \section{Decision variables}
     \begin{itemize}
@@ -42,7 +43,7 @@
             1 & \text{if } a_i \in r_h \\
             0 & \text{otherwise}
         \end{cases}, \quad c_{ih} \in \{0, 1\}$
-        \item Big $M$
+        \item $r_h$: position of the cluster $h$
     \end{itemize}
     \section{Equations}
     \begin{align}
@@ -58,10 +59,10 @@
     \end{align}
     \section{Notes}
     \begin{enumerate}
-        \item \label{note:betaijk}$\beta_{ijk} = \begin{cases}
+        \item \label{note:betaijk} $\beta_{ijk} = \begin{cases}
             1 & \text{if } f_k(a_i) > f_k(a_j) \\
             0 & otherwise
         \end{cases}, \quad \beta_{ijk} \in \{0, 1\}$
-        \item Big $M$ chosen so that $\dfrac{f_k(a_i)-f_k(a_j)}{M} \in \left]-1;1\right[$
+        \item \label{note:bigm} Big $M$ chosen so that $\dfrac{f_k(a_i)-f_k(a_j)}{M} \in \left]-1;1\right[$
     \end{enumerate}
 \end{document}
