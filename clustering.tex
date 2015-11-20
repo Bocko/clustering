@@ -1,4 +1,4 @@
-\documentclass[a4paper]{article}
+\documentclass[a4paper]{journal}
 \usepackage[utf8x]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{ucs}
@@ -8,7 +8,12 @@
 \usepackage{graphicx}
 \setlength\parindent{0pt}
 
+\title{Multi-criteria hierarchical clustering}
+\author{N.A.V. Doan, J. Rosenfeld, Y. De Smet}
+\date{}
+
 \begin{document}
+    \maketitle
     Definitions:
     \begin{itemize}
         \item $\mathcal{A}$: the set of $n$ alternatives $\mathcal{A} = \{a_1, a_2, \dots, a_n\} \quad (a_i,\, i = 1, 2, \dots, n)$
@@ -28,7 +33,7 @@
         \max z &= objective\_function\\
         \text{s.t.} & \\
         \phi(a_i) &= \phi^+(a_i) - \phi^-(a_i) \text{ (netflow)} \\
-        \phi^+(a_i) &= \frac{1}{n-1} \sum_{i \neq j}^{} \sum_{k}{} w_k \beta_{ijk} \\
+        \phi^+(a_i) &= \frac{1}{n-1} \sum_{i=1, i\neq j}^{n} \sum_{k=1}^{m} w_k \beta_{ijk} \\
         \beta_{ijk} &< \frac{f_k(a_i)-f_k(a_j)}{M} + 1 \\
         \beta_{ijk} &\geq \frac{f_k(a_i)-f_k(a_j)}{M} \\
         \beta_{ijk} &\in \{0,1\}\\
