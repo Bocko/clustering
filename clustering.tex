@@ -52,10 +52,10 @@
         \phi(a_i) &= \phi^+(a_i) - \phi^-(a_i) & \text{ (netflow)} \\
         \phi^+(a_i) &= \frac{1}{n-1} \sum_{j=1, j\neq i}^{n} \sum_{k=1}^{m} w_k \beta_{ijk} & \text{ (positive flow)} \\
         \phi^-(a_i) &= \frac{1}{n-1} \sum_{j=1, j\neq i}^{n} \sum_{k=1}^{m} w_k \beta_{jik} & \text{ (negative flow)} \\
-        \beta_{ijk} &\geq \frac{f_k(a_i)-f_k(a_j)}{M} & \text{ (linearization Note \ref{note:betaijk})} \\
-        \beta_{ijk} &< \frac{f_k(a_i)-f_k(a_j)}{M} + 1 \\
-        \beta_{ijk} &\in \{0,1\}\\
-        c_{ik} &\in \{0, 1\} & \text{ (decision variables)}
+        \beta_{ijk} &\geq \frac{f_k(a_i)-f_k(a_j)}{M} \quad \forall i,j = 1, 2, \dots, n;\; k = 1, 2, \dots, m & \text{ (linearization, see Note \ref{note:betaijk})} \\
+        \beta_{ijk} &< \frac{f_k(a_i)-f_k(a_j)}{M} + 1 \quad \forall i,j = 1, 2, \dots, n;\; k = 1, 2, \dots, m \\
+        \beta_{ijk} &\in \{0,1\} \quad \forall i,j = 1, 2, \dots, n;\; k = 1, 2, \dots, m \\
+        c_{ih} &\in \{0, 1\} \quad \forall i = 1, 2, \dots, n;\; h = 1, 2, \dots, l & \text{ (decision variables)}
     \end{align}
     \section{Notes}
     \begin{enumerate}
