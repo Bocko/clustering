@@ -45,16 +45,17 @@
         \item Big $M$
     \end{itemize}
     \section{Equations}
-    \begin{align*}
+    \begin{align}
         \max z &= \pi_{} - \pi_{}\\
         \text{s.t.} & \\
         \phi(a_i) &= \phi^+(a_i) - \phi^-(a_i) & \text{ (netflow)} \\
         \phi^+(a_i) &= \frac{1}{n-1} \sum_{j=1, j\neq i}^{n} \sum_{k=1}^{m} w_k \beta_{ijk} & \text{ (positive flow)} \\
+        \phi^-(a_i) &= \frac{1}{n-1} \sum_{j=1, j\neq i}^{n} \sum_{k=1}^{m} w_k \beta_{jik} & \text{ (negative flow)} \\
         \beta_{ijk} &\geq \frac{f_k(a_i)-f_k(a_j)}{M} & \text{ (linearization Note \ref{note:betaijk})} \\
         \beta_{ijk} &< \frac{f_k(a_i)-f_k(a_j)}{M} + 1 \\
         \beta_{ijk} &\in \{0,1\}\\
         c_{ik} &\in \{0, 1\} & \text{ (decision variables)}
-    \end{align*}
+    \end{align}
     \section{Notes}
     \begin{enumerate}
         \item \label{note:betaijk}$\beta_{ijk} = \begin{cases}
