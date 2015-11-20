@@ -25,14 +25,14 @@
     \section{Input data}
     \begin{itemize}
         \item Evaluation table: \begin{tabular}{c|cccccc}
-            $a$ & $f_1(\cdot)$ & $f_2(\cdot)$ & $\dots$ & $f_j(\cdot)$ & $\dots$ & $f_m(\cdot)$\\
+            $a$ & $f_1(\cdot)$ & $f_2(\cdot)$ & $\dots$ & $f_k(\cdot)$ & $\dots$ & $f_m(\cdot)$\\
             \hline
-            $a_1$ & $f_1(a_1)$ & $f_2(a_1)$ & $\dots$ & $f_j(a_1)$ & $\dots$ & $f_m(a_1)$\\
-            $a_2$ & $f_1(a_2)$ & $f_2(a_2)$ & $\dots$ & $f_j(a_2)$ & $\dots$ & $f_m(a_2)$\\
+            $a_1$ & $f_1(a_1)$ & $f_2(a_1)$ & $\dots$ & $f_k(a_1)$ & $\dots$ & $f_m(a_1)$\\
+            $a_2$ & $f_1(a_2)$ & $f_2(a_2)$ & $\dots$ & $f_k(a_2)$ & $\dots$ & $f_m(a_2)$\\
             $\vdots$ & $\vdots$ & $\vdots$ & $\ddots$ & $\vdots$ & $\ddots$ & $\vdots$\\
-            $a_i$ & $f_(a_i)$ & $f_2(a_i)$ & $\dots$ & $f_j(a_i)$ & $\dots$ & $f_m(a_i)$\\
+            $a_i$ & $f_(a_i)$ & $f_2(a_i)$ & $\dots$ & $f_k(a_i)$ & $\dots$ & $f_m(a_i)$\\
             $\vdots$ & $\vdots$ & $\vdots$ & $\ddots$ & $\vdots$ & $\ddots$ & $\vdots$\\
-            $a_n$ & $f_1(a_n)$ & $f_2(a_n)$ & $\dots$ & $f_j(a_n)$ & $\dots$ & $f_m(a_n)$\\
+            $a_n$ & $f_1(a_n)$ & $f_2(a_n)$ & $\dots$ & $f_k(a_n)$ & $\dots$ & $f_m(a_n)$\\
         \end{tabular}
         \item $\mathcal{W}$: the set of $m$ weights for the criteria: $\mathcal{W} = \{w_1, w_2, \dots, w_m\} \quad (\text{notation: } w_k,\, k = 1, 2, \dots, m)$
         \item Big $M$ (large value, see Note \ref{note:bigm})
@@ -43,7 +43,7 @@
             1 & \text{if } a_i \in r_h \\
             0 & \text{otherwise}
         \end{cases}, \quad c_{ih} \in \{0, 1\}$
-        \item $r_{kh}$: position of the cluster $h$ on the criterion $k$
+        \item $r_{kh}$: position of the cluster $h$ on the criterion $k$, $f_k(r_h)$
     \end{itemize}
     \section{Equations}
     \begin{align}
