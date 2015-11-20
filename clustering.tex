@@ -1,0 +1,42 @@
+\documentclass[a4paper]{article}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{ucs}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\setlength\parindent{0pt}
+
+\begin{document}
+    Definitions:
+    \begin{itemize}
+        \item $\mathcal{A}$: the set of $n$ alternatives $\mathcal{A} = \{a_1, a_2, \dots, a_n\} \quad (a_i,\, i = 1, 2, \dots, n)$
+        \item $\mathcal{F}$: the set of $m$ criteria $\mathcal{F} = \{f_1, f_2, \dots, f_m\} \quad (f_j,\, j = 1, 2, \dots, m)$
+        \item $\mathcal{R}$: the set of $l$ clusters $\mathcal{R} = \{r_1, r_2, \dots, r_l\} \quad (r_k,\, k = 1, 2, \dots, l)$
+    \end{itemize}
+    Decision variables:
+    \begin{itemize}
+        \item $c_{ik} = \begin{cases}
+            1 & \text{if } a_i \in r_k\\
+            0 & \text{otherwise}
+        \end{cases}, \quad c_{ik} \in \{0, 1\}$
+    \end{itemize}
+    Equations:
+    \begin{align*}
+        \max & \quad objective\_function\\
+        s.t & \\
+        \phi(a_i) &= \phi^+(a_i) - \phi^-(a_i) \text{ (netflow)}\\
+        \phi^+(a_i) &= \frac{1}{n-1} \sum_{i \neq j}^{} \sum_{k}{} w_k \beta_{ijk}\\
+        \beta_{ijk} &< \frac{f_k(a_i)-f_k(a_j)}{M} + 1\\
+        \beta_{ijk} &> \frac{f_k(a_i)-f_k(a_j)}{M} - 1\\
+        \beta_{ijk} &\in \{0,1\},
+    \end{align*}
+    Notes:
+    \begin{itemize}
+        \item $\beta_{ijk} = \begin{cases}
+            1 & \text{if } f_k(a_i) > f_k(a_j)\\
+            0 & otherwise
+        \end{cases}, \quad \beta_{ijk} \in \{0, 1\}$
+    \end{itemize}
+\end{document}
