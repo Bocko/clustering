@@ -10,7 +10,7 @@
 \usepackage{hyperref}
 \setlength\parindent{0pt}
 
-\title{Multi-criteria hierarchical clustering}
+\title{Multi-criteria ordered clustering}
 \author{N.A.V. Doan, J. Rosenfeld, Y. De Smet}
 \date{}
 
@@ -35,6 +35,7 @@
             $a_n$ & $f_1(a_n)$ & $f_2(a_n)$ & $\dots$ & $f_k(a_n)$ & $\dots$ & $f_m(a_n)$\\
         \end{tabular}
         \item $\mathcal{W}$: the set of $m$ weights for the criteria: $\mathcal{W} = \{w_1, w_2, \dots, w_m\} \quad (\text{notation: } w_k,\, k = 1, 2, \dots, m)$
+        \item $N$: the number of clusters
         \item Big $M$ (large value, see Note \ref{note:bigm})
     \end{itemize}
     \section{Decision variables}
@@ -47,7 +48,9 @@
     \end{itemize}
     \section{Equations}
     \begin{align}
-        \max z &= \pi_{} - \pi_{}\\
+    	\max z &=
+        %\min z &= \sum_{i} \sum_{j} \sum_{k} w_k (\pi_k(a_i,a_j) + \pi_k(a_j,a_i)) &\forall a_i, a_j \in r_h\\
+        %\max z &= \sum_{i} \sum_{j} \sum_{k} w_k (\pi_k(a_i,a_j) - \pi_k(a_j,a_i)) &\forall a_i \in r_h, \forall a_j \in r_g, g < h\\
         \text{s.t.} & \\
         \phi(a_i) &= \phi^+(a_i) - \phi^-(a_i) & \text{ (netflow)} \\
         \phi^+(a_i) &= \frac{1}{n-1} \sum_{j=1, j\neq i}^{n} \sum_{k=1}^{m} w_k \beta_{ijk} & \text{ (positive flow)} \\
