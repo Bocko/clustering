@@ -2,23 +2,17 @@ from pulp import *
 from promethee import *
 import csv
 
-# criteria = ['Infrastructure', 'Spatial', 'Education', 'CultureEnv', 'Healthcare', 'Stability']
-criteria = ['1', '2', '3', '4']
+criteria = ['Infrastructure', 'Spatial', 'Education', 'CultureEnv', 'Healthcare', 'Stability']
 
-# weights = [0.15, 0.25, 0.075, 0.1875, 0.15, 0.1875]
-weights = [0.25, 0.25, 0.25, 0.25]
+weights = [0.15, 0.25, 0.075, 0.1875, 0.15, 0.1875]
 
-fctPrefCrit = [PreferenceType2(0), PreferenceType2(0), PreferenceType2(0),  PreferenceType2(0)]#, PreferenceType2(0), PreferenceType2(0)]
+fctPrefCrit = [PreferenceType2(0), PreferenceType2(0), PreferenceType2(0),  PreferenceType2(0), PreferenceType2(0), PreferenceType2(0)]
 
-# names = ['Hong Kong', 'Stockholm', 'Rome', 'New York', 'Atlanta', 'Buenos Aires', 'Santiago', 'Sao Paulo', 'Mexico City', 'New Delhi', 'Istanbul', 'Jakarta', 'Tehran', 'Dakar']
-eval_table = []
-with open('flower.csv', newline='') as csvfile:
-    content = csv.reader(csvfile, delimiter=',', quotechar='|')
-    for row in content:
-        eval_table.append(list(map(lambda x: float(x), row)))
-# eval_table = [[96.4, 75.0, 100.0, 85.9, 87.5, 95.0],
-# [96.4, 58.9, 100.0, 91.2, 95.8, 95.0],
-# [92.9, 67.3, 100.0, 91.7, 87.5, 80.0],
+names = ['Hong Kong', 'Stockholm', 'Rome', 'New York', 'Atlanta', 'Buenos Aires', 'Santiago', 'Sao Paulo', 'Mexico City', 'New Delhi', 'Istanbul', 'Jakarta', 'Tehran', 'Dakar']
+
+eval_table = [[96.4, 75.0, 100.0, 85.9, 87.5, 95.0],
+[96.4, 58.9, 100.0, 91.2, 95.8, 95.0],
+[92.9, 67.3, 100.0, 91.7, 87.5, 80.0]]
 # [89.3, 65.2, 100.0, 91.7, 91.7, 70.0],
 # [92.9, 42.9, 100.0, 91.7, 91.7, 85.0],
 # [85.7, 42.3, 100.0, 85.9, 87.5, 70.0],
@@ -30,6 +24,15 @@ with open('flower.csv', newline='') as csvfile:
 # [57.1, 42.3, 66.7, 59.3, 45.8, 50.0],
 # [33.9, 53.6, 50.0, 35.9, 62.5, 50.0],
 # [37.5, 22.6, 50.0, 59.7, 41.7, 50.0]]
+
+# criteria = ['1', '2', '3', '4']
+# weights = [0.25, 0.25, 0.25, 0.25]
+# fctPrefCrit = [PreferenceType2(0), PreferenceType2(0), PreferenceType2(0),  PreferenceType2(0)]#
+# eval_table = []
+# with open('flower.csv', newline='') as csvfile:
+#     content = csv.reader(csvfile, delimiter=',', quotechar='|')
+#     for row in content:
+#         eval_table.append(list(map(lambda x: float(x), row)))
 
 uninetflows = uninetflows_eval(eval_table,criteria,weights,fctPrefCrit)
 
