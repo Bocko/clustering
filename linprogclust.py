@@ -11,18 +11,18 @@ names = ['Hong Kong', 'Stockholm', 'Rome', 'New York', 'Atlanta', 'Buenos Aires'
 
 eval_table = [[96.4, 75.0, 100.0, 85.9, 87.5, 95.0],
 [96.4, 58.9, 100.0, 91.2, 95.8, 95.0],
-[92.9, 67.3, 100.0, 91.7, 87.5, 80.0]]
-# [89.3, 65.2, 100.0, 91.7, 91.7, 70.0],
-# [92.9, 42.9, 100.0, 91.7, 91.7, 85.0],
-# [85.7, 42.3, 100.0, 85.9, 87.5, 70.0],
-# [85.7, 35.1, 83.3, 89.1, 70.8, 75.0],
-# [66.1, 52.4, 66.7, 80.3, 70.8, 60.0],
-# [46.4, 65.8, 75.0, 82.4, 66.7, 45.0],
-# [58.9, 58.6, 75.0, 55.6, 58.3, 55.0],
-# [67.9, 47.5, 58.3, 68.8, 50.0, 55.0],
-# [57.1, 42.3, 66.7, 59.3, 45.8, 50.0],
-# [33.9, 53.6, 50.0, 35.9, 62.5, 50.0],
-# [37.5, 22.6, 50.0, 59.7, 41.7, 50.0]]
+[92.9, 67.3, 100.0, 91.7, 87.5, 80.0],
+[89.3, 65.2, 100.0, 91.7, 91.7, 70.0],
+[92.9, 42.9, 100.0, 91.7, 91.7, 85.0],
+[85.7, 42.3, 100.0, 85.9, 87.5, 70.0],
+[85.7, 35.1, 83.3, 89.1, 70.8, 75.0],
+[66.1, 52.4, 66.7, 80.3, 70.8, 60.0],
+[46.4, 65.8, 75.0, 82.4, 66.7, 45.0],
+[58.9, 58.6, 75.0, 55.6, 58.3, 55.0],
+[67.9, 47.5, 58.3, 68.8, 50.0, 55.0],
+[57.1, 42.3, 66.7, 59.3, 45.8, 50.0],
+[33.9, 53.6, 50.0, 35.9, 62.5, 50.0],
+[37.5, 22.6, 50.0, 59.7, 41.7, 50.0]]
 
 # uninetflows = uninetflows_eval(candidats,criteres,init_weights,fctPrefCrit)
 
@@ -133,7 +133,7 @@ for i in alts:
                     prob += alpha[(i,j,h)] <= 0.5*(c[i,h] + c[j,h])
 
                     for l in clusts:
-                        prob += nu[(i,j,h,l,k)] >= beta[(i,j,h,l)] + gamma[(i,j,k)]
+                        prob += nu[(i,j,h,l,k)] >= beta[(i,j,h,l)] + gamma[(i,j,k)] - 1
                         prob += nu[(i,j,h,l,k)] <= 0.5*(beta[(i,j,h,l)] + gamma[(i,j,k)])
 
 
@@ -141,17 +141,17 @@ for h in clusts:
     prob += lpSum([c[(i,h)] for i in alts]) >= 1
 
 for i in alts:
-    prob += lpSum([c[i,h] for h in clusts]) >= 1
+    prob += lpSum([c[i,h] for h in clusts]) == 1
 #print(prob)
 
 # prob.writeLP("linprogclust.lp")
 prob.solve(GUROBI())
 #
-# print("Objective function:", value(prob.objective))
-# for v in prob.variables():
-#     if 'q' in v.name:
-#         print(v.name, "=", v.varValue)
-# print("Status:", LpStatus[prob.status])
+print("Objective function:", value(prob.objective))
+for v in prob.variables():
+    if 'c' in v.name:
+        print(v.name, "=", v.varValue)
+print("Status:", LpStatus[prob.status])
 
 # iter = 0
 # sols = []
