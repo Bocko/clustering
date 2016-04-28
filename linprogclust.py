@@ -1,30 +1,37 @@
 from pulp import *
 from promethee import *
+import csv
 
-criteria = ['Infrastructure', 'Spatial', 'Education', 'CultureEnv', 'Healthcare', 'Stability']
+# criteria = ['Infrastructure', 'Spatial', 'Education', 'CultureEnv', 'Healthcare', 'Stability']
+criteria = ['1', '2', '3', '4']
 
-weights = [0.15, 0.25, 0.075, 0.1875, 0.15, 0.1875]
+# weights = [0.15, 0.25, 0.075, 0.1875, 0.15, 0.1875]
+weights = [0.25, 0.25, 0.25, 0.25]
 
-# fctPrefCrit = [PreferenceType2(0), PreferenceType2(0), PreferenceType2(0),  PreferenceType2(0), PreferenceType2(0), PreferenceType2(0)]
+fctPrefCrit = [PreferenceType2(0), PreferenceType2(0), PreferenceType2(0),  PreferenceType2(0)]#, PreferenceType2(0), PreferenceType2(0)]
 
-names = ['Hong Kong', 'Stockholm', 'Rome', 'New York', 'Atlanta', 'Buenos Aires', 'Santiago', 'Sao Paulo', 'Mexico City', 'New Delhi', 'Istanbul', 'Jakarta', 'Tehran', 'Dakar']
+# names = ['Hong Kong', 'Stockholm', 'Rome', 'New York', 'Atlanta', 'Buenos Aires', 'Santiago', 'Sao Paulo', 'Mexico City', 'New Delhi', 'Istanbul', 'Jakarta', 'Tehran', 'Dakar']
+eval_table = []
+with open('flower.csv', newline='') as csvfile:
+    content = csv.reader(csvfile, delimiter=',', quotechar='|')
+    for row in content:
+        eval_table.append(list(map(lambda x: float(x), row)))
+# eval_table = [[96.4, 75.0, 100.0, 85.9, 87.5, 95.0],
+# [96.4, 58.9, 100.0, 91.2, 95.8, 95.0],
+# [92.9, 67.3, 100.0, 91.7, 87.5, 80.0],
+# [89.3, 65.2, 100.0, 91.7, 91.7, 70.0],
+# [92.9, 42.9, 100.0, 91.7, 91.7, 85.0],
+# [85.7, 42.3, 100.0, 85.9, 87.5, 70.0],
+# [85.7, 35.1, 83.3, 89.1, 70.8, 75.0],
+# [66.1, 52.4, 66.7, 80.3, 70.8, 60.0],
+# [46.4, 65.8, 75.0, 82.4, 66.7, 45.0],
+# [58.9, 58.6, 75.0, 55.6, 58.3, 55.0],
+# [67.9, 47.5, 58.3, 68.8, 50.0, 55.0],
+# [57.1, 42.3, 66.7, 59.3, 45.8, 50.0],
+# [33.9, 53.6, 50.0, 35.9, 62.5, 50.0],
+# [37.5, 22.6, 50.0, 59.7, 41.7, 50.0]]
 
-eval_table = [[96.4, 75.0, 100.0, 85.9, 87.5, 95.0],
-[96.4, 58.9, 100.0, 91.2, 95.8, 95.0],
-[92.9, 67.3, 100.0, 91.7, 87.5, 80.0],
-[89.3, 65.2, 100.0, 91.7, 91.7, 70.0],
-[92.9, 42.9, 100.0, 91.7, 91.7, 85.0],
-[85.7, 42.3, 100.0, 85.9, 87.5, 70.0],
-[85.7, 35.1, 83.3, 89.1, 70.8, 75.0],
-[66.1, 52.4, 66.7, 80.3, 70.8, 60.0],
-[46.4, 65.8, 75.0, 82.4, 66.7, 45.0],
-[58.9, 58.6, 75.0, 55.6, 58.3, 55.0],
-[67.9, 47.5, 58.3, 68.8, 50.0, 55.0],
-[57.1, 42.3, 66.7, 59.3, 45.8, 50.0],
-[33.9, 53.6, 50.0, 35.9, 62.5, 50.0],
-[37.5, 22.6, 50.0, 59.7, 41.7, 50.0]]
-
-# uninetflows = uninetflows_eval(candidats,criteres,init_weights,fctPrefCrit)
+uninetflows = uninetflows_eval(eval_table,criteria,weights,fctPrefCrit)
 
 # uniposflows, uninegflows = uniflows_eval(candidats, criteres, init_weights, fctPrefCrit)
 
@@ -152,6 +159,23 @@ for v in prob.variables():
     if 'c' in v.name:
         print(v.name, "=", v.varValue)
 print("Status:", LpStatus[prob.status])
+
+f = open('clustering.m','w')
+f.write("clusts = [ ")
+for i in alts:
+    for h in clusts:
+        if c[(i,h)].varValue == 1:
+            f.write(str(h) + '\n')
+f.write("];\n")
+f.write("criteria = {")
+for crit in criteria:
+    f.write("'" + crit + "' ")
+f.write('};')
+f.close()
+
+with open("uninetflows.csv", "w") as f:
+    writer = csv.writer(f)
+    writer.writerows(uninetflows)
 
 # iter = 0
 # sols = []
