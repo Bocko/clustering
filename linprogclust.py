@@ -1,6 +1,11 @@
 from pulp import *
 from promethee import *
 import csv
+import pandas as pd
+from scipy.cluster.vq import kmeans, vq
+from statsmodels.sandbox.tools.tools_pca import pcasvd, pca
+import matplotlib.pyplot as plt
+from pca_kmeans_biplot import *
 
 # criteria = ['Infrastructure', 'Spatial', 'Education', 'CultureEnv', 'Healthcare', 'Stability']
 #
@@ -34,7 +39,7 @@ import csv
 #     for row in content:
 #         eval_table.append(list(map(lambda x: float(x), row)))
 
-criteria = ['1', '2', '3', '4', '5', '6']
+criteria = ['crit1', 'crit2', 'crit3', 'crit4', 'crit5', 'crit6']
 weights = [0.1, 0.2, 0.2, 0.2, 0.2, 0.1]
 fctPrefCrit = [PreferenceType2(0), PreferenceType2(0), PreferenceType2(0),  PreferenceType2(0), PreferenceType2(0), PreferenceType2(0)]
 eval_table = []
@@ -42,7 +47,7 @@ with open('shanghai.csv', newline='') as csvfile:
     content = csv.reader(csvfile, delimiter=',', quotechar='|')
     for row in content:
         eval_table.append(list(map(lambda x: float(x), row)))
-eval_table = eval_table[:15]
+eval_table = eval_table[:20]
 
 # criteria = ['1', '2']
 # weights = [0.5, 0.5]
@@ -87,7 +92,7 @@ prob = LpProblem("IPO_t",LpMaximize)
 
 # Constants
 M = 1e6
-N = 3
+N = 4
 EPS = 1e-6
 #init_weights = [0.1, 0.3, 0.6]
 #criteria = [str(x) for x in range(len(init_weights))]
@@ -153,7 +158,7 @@ for i in alts:
                             obj_het.append(nu[i,j,h,l,k]*weights[k])
 
 # prob += lpSum(obj_hom)+lpSum(obj_het)
-prob += lpSum(obj_het)
+prob += lpSum(obj_het)-lpSum(obj_hom)
 
 # Constraints
 for i in alts:
@@ -192,18 +197,20 @@ for i in alts:
 
 prob.writeLP("linprogclust.lp")
 prob.solve(GUROBI())
-#
-print("Objective function:", value(prob.objective))
+
 for v in prob.variables():
     if 'c' in v.name:
         print(v.name, "=", v.varValue)
+print("Objective function:", value(prob.objective))
 print("Status:", LpStatus[prob.status])
 
+clust_repart = []
 f = open('clustering.m','w')
 f.write("clusts = [ ")
 for i in alts:
     for h in clusts:
         if c[(i,h)].varValue == 1:
+            clust_repart.append(h)
             f.write(str(h) + '\n')
 f.write("];\n")
 f.write("criteria = {")
@@ -212,9 +219,20 @@ for crit in criteria:
 f.write('};')
 f.close()
 
+uninetflows.insert(0,criteria)
 with open("uninetflows.csv", "w") as f:
     writer = csv.writer(f)
     writer.writerows(uninetflows)
+
+df = pd.io.parsers.read_csv('uninetflows.csv')
+data = df[criteria]
+# data = (data - data.mean()) / data.std()
+pca = pcasvd(data, keepdim=0, demean=False)
+colors = ['gbyrk'[i] for i in clust_repart]
+plt.figure(1)
+biplot(plt, pca, labels=data.index, colors=colors,
+       xpc=1, ypc=2)
+plt.show()
 
 # iter = 0
 # sols = []

@@ -2,7 +2,8 @@ clustering
 uninetflows = csvread('uninetflows.csv');
 % [pc,score,latent,tsquare] = princomp(uninetflows);
 [pc, score] = pca(zscore(uninetflows));
-format = { {}; {'Marker', '^', 'MarkerSize', 6}; {'Marker', 's', 'MarkerSize', 6} };
+% format = { {}; {'Marker', '^', 'MarkerSize', 6}; {'Marker', 's', 'MarkerSize', 6}; {'Marker', '+', 'MarkerSize', 6} };
+format = { {}; {'Marker', '^', 'MarkerSize', 6}; {'Marker', 's', 'MarkerSize', 6}};
 biplotG(pc,score,'Groups',clusts,'VarLabels',criteria,'Format',format);
 
 % figure
