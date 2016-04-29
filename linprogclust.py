@@ -2,17 +2,17 @@ from pulp import *
 from promethee import *
 import csv
 
-criteria = ['Infrastructure', 'Spatial', 'Education', 'CultureEnv', 'Healthcare', 'Stability']
-
-weights = [0.15, 0.25, 0.075, 0.1875, 0.15, 0.1875]
-
-fctPrefCrit = [PreferenceType2(0), PreferenceType2(0), PreferenceType2(0),  PreferenceType2(0), PreferenceType2(0), PreferenceType2(0)]
-
-names = ['Hong Kong', 'Stockholm', 'Rome', 'New York', 'Atlanta', 'Buenos Aires', 'Santiago', 'Sao Paulo', 'Mexico City', 'New Delhi', 'Istanbul', 'Jakarta', 'Tehran', 'Dakar']
-
-eval_table = [[96.4, 75.0, 100.0, 85.9, 87.5, 95.0],
-[96.4, 58.9, 100.0, 91.2, 95.8, 95.0],
-[92.9, 67.3, 100.0, 91.7, 87.5, 80.0]]
+# criteria = ['Infrastructure', 'Spatial', 'Education', 'CultureEnv', 'Healthcare', 'Stability']
+#
+# weights = [0.15, 0.25, 0.075, 0.1875, 0.15, 0.1875]
+#
+# fctPrefCrit = [PreferenceType2(0), PreferenceType2(0), PreferenceType2(0),  PreferenceType2(0), PreferenceType2(0), PreferenceType2(0)]
+#
+# names = ['Hong Kong', 'Stockholm', 'Rome', 'New York', 'Atlanta', 'Buenos Aires', 'Santiago', 'Sao Paulo', 'Mexico City', 'New Delhi', 'Istanbul', 'Jakarta', 'Tehran', 'Dakar']
+#
+# eval_table = [[96.4, 75.0, 100.0, 85.9, 87.5, 95.0],
+# [96.4, 58.9, 100.0, 91.2, 95.8, 95.0],
+# [92.9, 67.3, 100.0, 91.7, 87.5, 80.0],
 # [89.3, 65.2, 100.0, 91.7, 91.7, 70.0],
 # [92.9, 42.9, 100.0, 91.7, 91.7, 85.0],
 # [85.7, 42.3, 100.0, 85.9, 87.5, 70.0],
@@ -33,6 +33,29 @@ eval_table = [[96.4, 75.0, 100.0, 85.9, 87.5, 95.0],
 #     content = csv.reader(csvfile, delimiter=',', quotechar='|')
 #     for row in content:
 #         eval_table.append(list(map(lambda x: float(x), row)))
+
+criteria = ['1', '2', '3', '4', '5', '6']
+weights = [0.1, 0.2, 0.2, 0.2, 0.2, 0.1]
+fctPrefCrit = [PreferenceType2(0), PreferenceType2(0), PreferenceType2(0),  PreferenceType2(0), PreferenceType2(0), PreferenceType2(0)]
+eval_table = []
+with open('shanghai.csv', newline='') as csvfile:
+    content = csv.reader(csvfile, delimiter=',', quotechar='|')
+    for row in content:
+        eval_table.append(list(map(lambda x: float(x), row)))
+eval_table = eval_table[:15]
+
+# criteria = ['1', '2']
+# weights = [0.5, 0.5]
+# fctPrefCrit = [PreferenceType2(0), PreferenceType2(0)]
+# eval_table = [[0, 0],
+# [0.1, 0.1],
+# [0.2, 0.2],
+# [4, 4],
+# [4.1, 4.1],
+# [4.2, 4.2],
+# [10, 10],
+# [10.1, 10.1],
+# [10.2, 10.2]]
 
 uninetflows = uninetflows_eval(eval_table,criteria,weights,fctPrefCrit)
 
@@ -65,7 +88,7 @@ prob = LpProblem("IPO_t",LpMaximize)
 # Constants
 M = 1e6
 N = 3
-EPS = 1e-5
+EPS = 1e-6
 #init_weights = [0.1, 0.3, 0.6]
 #criteria = [str(x) for x in range(len(init_weights))]
 n = len(eval_table)
@@ -88,7 +111,6 @@ for i in alts:
             for k in crits:
                 gamma_comb.append((i,j,k))
 gamma = LpVariable.dicts("gamma",gamma_comb,cat="Binary")
-M = 1000
 
 alpha_comb = []
 beta_comb = []
@@ -98,7 +120,8 @@ for i in alts:
             for h in clusts:
                 alpha_comb.append((i,j,h))
                 for l in clusts:
-                    beta_comb.append((i,j,h,l))
+                    if l != h:
+                        beta_comb.append((i,j,h,l))
 alpha = LpVariable.dicts("alpha",alpha_comb,cat="Binary")
 beta = LpVariable.dicts("beta",beta_comb,cat="Binary")
 
@@ -106,11 +129,13 @@ mu_comb = []
 nu_comb = []
 for i in alts:
     for j in alts:
-        for h in clusts:
-            for k in crits:
-                mu_comb.append((i,j,h,k))
-                for l in clusts:
-                    nu_comb.append((i,j,h,l,k))
+        if i != j:
+            for h in clusts:
+                for k in crits:
+                    mu_comb.append((i,j,h,k))
+                    for l in clusts:
+                        if l != h:
+                            nu_comb.append((i,j,h,l,k))
 mu = LpVariable.dicts("mu",mu_comb,cat="Binary")
 nu = LpVariable.dicts("nu",nu_comb,cat="Binary")
 
@@ -124,9 +149,11 @@ for i in alts:
                 for h in clusts:
                     obj_hom.append(mu[(i,j,h,k)]*weights[k])
                     for l in clusts:
-                        obj_het.append(nu[i,j,h,l,k]*weights[k])
+                        if l != h:
+                            obj_het.append(nu[i,j,h,l,k]*weights[k])
 
-prob += lpSum(obj_hom)+lpSum(obj_het)
+# prob += lpSum(obj_hom)+lpSum(obj_het)
+prob += lpSum(obj_het)
 
 # Constraints
 for i in alts:
@@ -135,17 +162,26 @@ for i in alts:
             for k in crits:
                 prob += gamma[(i,j,k)] >= (eval_table[i][k]-eval_table[j][k])/M
                 prob += gamma[(i,j,k)] <= (eval_table[i][k]-eval_table[j][k])/M + 1 - EPS
-                for h in clusts:
+                for h in clusts[:-1]:
                     prob += mu[(i,j,h,k)] >= alpha[(i,j,h)] + gamma[(i,j,k)] -1
                     prob += mu[(i,j,h,k)] <= 0.5*(alpha[(i,j,h)] + gamma[(i,j,k)])
 
                     prob += alpha[(i,j,h)] >= c[(i,h)] + c[(j,h)] - 1
                     prob += alpha[(i,j,h)] <= 0.5*(c[i,h] + c[j,h])
 
-                    for l in clusts:
-                        prob += nu[(i,j,h,l,k)] >= beta[(i,j,h,l)] + gamma[(i,j,k)] - 1
-                        prob += nu[(i,j,h,l,k)] <= 0.5*(beta[(i,j,h,l)] + gamma[(i,j,k)])
+                    prob += nu[(i,j,h,h+1,k)] >= beta[(i,j,h,h+1)] + gamma[(i,j,k)] - 1
+                    prob += nu[(i,j,h,h+1,k)] <= 0.5*(beta[(i,j,h,h+1)] + gamma[(i,j,k)])
 
+                    prob += beta[(i,j,h,h+1)] >= c[(i,h)] + c[(j,h+1)] - 1
+                    prob += beta[(i,j,h,h+1)] <= 0.5*(c[(i,h)] + c[j,h+1])
+
+                    # for l in clusts:
+                    #     if l != h:
+                    #         prob += nu[(i,j,h,l,k)] >= beta[(i,j,h,l)] + gamma[(i,j,k)] - 1
+                    #         prob += nu[(i,j,h,l,k)] <= 0.5*(beta[(i,j,h,l)] + gamma[(i,j,k)])
+                    #
+                    #         prob += beta[(i,j,h,l)] >= c[(i,h)] + c[(j,l)] - 1
+                    #         prob += beta[(i,j,h,l)] <= 0.5*(c[(i,h)] + c[j,l])
 
 for h in clusts:
     prob += lpSum([c[(i,h)] for i in alts]) >= 1
@@ -154,7 +190,7 @@ for i in alts:
     prob += lpSum([c[i,h] for h in clusts]) == 1
 #print(prob)
 
-# prob.writeLP("linprogclust.lp")
+prob.writeLP("linprogclust.lp")
 prob.solve(GUROBI())
 #
 print("Objective function:", value(prob.objective))
