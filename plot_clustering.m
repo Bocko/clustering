@@ -1,5 +1,5 @@
 clustering
-uninetflows = csvread('uninetflows.csv');
+uninetflows = csvread('uninetflows.csv',1,0);
 % [pc,score,latent,tsquare] = princomp(uninetflows);
 [pc, score] = pca(zscore(uninetflows));
 % format = { {}; {'Marker', '^', 'MarkerSize', 6}; {'Marker', 's', 'MarkerSize', 6}; {'Marker', '+', 'MarkerSize', 6} };

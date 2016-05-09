@@ -1,5 +1,6 @@
 from pulp import *
 from promethee import *
+import time
 import csv
 import pandas as pd
 from scipy.cluster.vq import kmeans, vq
@@ -34,7 +35,7 @@ from pca_kmeans_biplot import *
 # weights = [0.25, 0.25, 0.25, 0.25]
 # fctPrefCrit = [PreferenceType2(0), PreferenceType2(0), PreferenceType2(0),  PreferenceType2(0)]#
 # eval_table = []
-# with open('flower.csv', newline='') as csvfile:
+# with open('flower.csv', newline='') as csvfile:xx
 #     content = csv.reader(csvfile, delimiter=',', quotechar='|')
 #     for row in content:
 #         eval_table.append(list(map(lambda x: float(x), row)))
@@ -47,7 +48,7 @@ with open('shanghai.csv', newline='') as csvfile:
     content = csv.reader(csvfile, delimiter=',', quotechar='|')
     for row in content:
         eval_table.append(list(map(lambda x: float(x), row)))
-eval_table = eval_table[:20]
+eval_table = eval_table[:15]
 
 # criteria = ['1', '2']
 # weights = [0.5, 0.5]
@@ -88,11 +89,11 @@ def negflow_eval(i,n,weights,gamma):
     return (1/(n-1)) * negflow
 
 # Problem definition
-prob = LpProblem("IPO_t",LpMaximize)
+prob = LpProblem("LPC",LpMaximize)
 
 # Constants
 M = 1e6
-N = 4
+N = 3 # Number of clusters
 EPS = 1e-6
 #init_weights = [0.1, 0.3, 0.6]
 #criteria = [str(x) for x in range(len(init_weights))]
@@ -188,6 +189,18 @@ for i in alts:
                     #         prob += beta[(i,j,h,l)] >= c[(i,h)] + c[(j,l)] - 1
                     #         prob += beta[(i,j,h,l)] <= 0.5*(c[(i,h)] + c[j,l])
 
+
+for k in crits:
+    for h in clusts[:-1]:
+        clust_ord_i = 0
+        clust_ord_j = 0
+        for i in alts:
+            for j in alts:
+                if j != i:
+                    clust_ord_i += beta[(i,j,h,h+1)]*eval_table[i][k]
+                    clust_ord_j += beta[(i,j,h,h+1)]*eval_table[j][k]
+        prob += clust_ord_i >= clust_ord_j + EPS
+
 for h in clusts:
     prob += lpSum([c[(i,h)] for i in alts]) >= 1
 
@@ -196,13 +209,16 @@ for i in alts:
 #print(prob)
 
 prob.writeLP("linprogclust.lp")
+start_time = time.time()
 prob.solve(GUROBI())
+stop_time = time.time() - start_time
 
 for v in prob.variables():
     if 'c' in v.name:
         print(v.name, "=", v.varValue)
 print("Objective function:", value(prob.objective))
 print("Status:", LpStatus[prob.status])
+print("Time:", stop_time)
 
 clust_repart = []
 f = open('clustering.m','w')
