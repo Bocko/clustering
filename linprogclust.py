@@ -48,7 +48,7 @@ with open('shanghai.csv', newline='') as csvfile:
     content = csv.reader(csvfile, delimiter=',', quotechar='|')
     for row in content:
         eval_table.append(list(map(lambda x: float(x), row)))
-eval_table = eval_table[:15]
+eval_table = eval_table[:25]
 
 # criteria = ['1', '2']
 # weights = [0.5, 0.5]

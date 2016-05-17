@@ -44,28 +44,41 @@
             1 & \text{if } a_i \in r_h \\
             0 & \text{otherwise}
         \end{cases}, \quad c_{ih} \in \{0, 1\}$
-        \item $r_{kh}$: position of the cluster $h$ on the criterion $k$, $f_k(r_h)$
+        %\item $r_{kh}$: position of the cluster $h$ on the criterion $k$, $f_k(r_h)$
     \end{itemize}
     \section{Equations}
     \begin{align}
-    	\max z &=
+    	\max z &= \sum_i \sum_j \sum_h \sum_l \sum_k \nu_{ijhlk} w_k - \mu_{ijhk} w_k \\
         %\min z &= \sum_{i} \sum_{j} \sum_{k} w_k (\pi_k(a_i,a_j) + \pi_k(a_j,a_i)) &\forall a_i, a_j \in r_h\\
         %\max z &= \sum_{i} \sum_{j} \sum_{k} w_k (\pi_k(a_i,a_j) - \pi_k(a_j,a_i)) &\forall a_i \in r_h, \forall a_j \in r_g, g < h\\
         \text{s.t.} & \\
-        \phi(a_i) &= \phi^+(a_i) - \phi^-(a_i) & \text{ (netflow)} \\
-        \phi^+(a_i) &= \frac{1}{n-1} \sum_{j=1, j\neq i}^{n} \sum_{k=1}^{m} w_k \beta_{ijk} & \text{ (positive flow)} \\
-        \phi^-(a_i) &= \frac{1}{n-1} \sum_{j=1, j\neq i}^{n} \sum_{k=1}^{m} w_k \beta_{jik} & \text{ (negative flow)} \\
-        \beta_{ijk} &\geq \frac{f_k(a_i)-f_k(a_j)}{M} \quad \forall i,j = 1, 2, \dots, n;\; k = 1, 2, \dots, m & \text{ (linearization, see Note \ref{note:betaijk})} \\
-        \beta_{ijk} &< \frac{f_k(a_i)-f_k(a_j)}{M} + 1 \quad \forall i,j = 1, 2, \dots, n;\; k = 1, 2, \dots, m \\
-        \beta_{ijk} &\in \{0,1\} \quad \forall i,j = 1, 2, \dots, n;\; k = 1, 2, \dots, m \\
+        \gamma_{ijk} &\geq \frac{f_k(a_i)-f_k(a_j)}{M} \quad \forall i,j = 1, 2, \dots, n;\; k = 1, 2, \dots, m & \text{ (linearization, see Note \ref{note:betaijk})} \\
+        \gamma_{ijk} &< \frac{f_k(a_i)-f_k(a_j)}{M} + 1 \quad \forall i,j = 1, 2, \dots, n;\; k = 1, 2, \dots, m \\
+        \mu_{ijhk}  &\geq \alpha_{ijh} + \gamma_{ijk} - 1 \\
+        \mu_{ijhk} &\leq \frac{\alpha_{ijh} + \gamma_{ijk}}{2} \\
+        \alpha_{ijh} &\geq c_{ih} + c_{jh} - 1\\
+        \alpha_{ijh} &\leq \frac{c_{ih} + c_{jh}}{2} \\
+        \nu_{ijhh_{+1}k}  &\geq \beta_{ijhh_{+1}} + \gamma_{ijk} - 1 \\
+        \nu_{ijhh_{+1}k} &\leq \frac{\beta_{ijhh_{+1}} + \gamma_{ijk}}{2} \\
+        \beta_{ijhh_{+1}} &\geq c_{ih} + c_{jh_{+1}} - 1\\
+        \beta_{ijhh_{+1}} &\leq \frac{c_{ih} + c_{jh_{+1}}}{2} \\
+        \gamma_{ijk} &\in \{0,1\} \quad \forall i,j = 1, 2, \dots, n;\; k = 1, 2, \dots, m \\
+        \alpha_{ijh} &\in \{0,1\} \\
+        \beta_{ijhl} &\in \{0,1\} \\
+        \mu_{ijhk} &\in \{0,1\} \\
+        \nu_{ijhlk} &\in \{0,1\} \\
         c_{ih} &\in \{0, 1\} \quad \forall i = 1, 2, \dots, n;\; h = 1, 2, \dots, l & \text{ (decision variables)}
     \end{align}
     \section{Notes}
     \begin{enumerate}
         \item \label{note:bigm} Big $M$ chosen so that $\dfrac{f_k(a_i)-f_k(a_j)}{M} \in \left]-1;1\right[$
-        \item \label{note:betaijk} $\beta_{ijk} = \begin{cases}
+        \item \label{note:betaijk} $\gamma_{ijk} = \begin{cases}
             1 & \text{if } f_k(a_i) > f_k(a_j) \\
             0 & otherwise
-        \end{cases}, \quad \beta_{ijk} \in \{0, 1\}$
+        \end{cases}, \quad \gamma_{ijk} \in \{0, 1\}$
+        \item $\alpha_{ijh} = \begin{cases}
+            1 & \text{if } a_i, a_j \in r_h \\
+            0 & otherwise
+        \end{cases}, \quad \gamma_{ijk} \in \{0, 1\}$
     \end{enumerate}
 \end{document}
