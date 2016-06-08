@@ -62,6 +62,8 @@
         \nu_{ijhh_{+1}k} &\leq \frac{\beta_{ijhh_{+1}} + \gamma_{ijk}}{2} \\
         \beta_{ijhh_{+1}} &\geq c_{ih} + c_{jh_{+1}} - 1\\
         \beta_{ijhh_{+1}} &\leq \frac{c_{ih} + c_{jh_{+1}}}{2} \\
+        \sum_i c_{ih} &\geq 1 \quad \forall h = 1,2, \dots, l \\
+        \sum_h c_{ih} &= 1 \quad \forall i = 1,2, \dots, n \\
         \gamma_{ijk} &\in \{0,1\} \quad \forall i,j = 1, 2, \dots, n;\; k = 1, 2, \dots, m \\
         \alpha_{ijh} &\in \{0,1\} \\
         \beta_{ijhl} &\in \{0,1\} \\
@@ -77,8 +79,20 @@
             0 & otherwise
         \end{cases}, \quad \gamma_{ijk} \in \{0, 1\}$
         \item $\alpha_{ijh} = \begin{cases}
-            1 & \text{if } a_i, a_j \in r_h \\
+            1 & \text{if } a_i \in r_h \text{ and } a_j \in r_h \\
             0 & otherwise
-        \end{cases}, \quad \gamma_{ijk} \in \{0, 1\}$
+        \end{cases}, \quad \alpha_{ijh} \in \{0, 1\}$
+        \item $\mu_{ijhk} = \begin{cases}
+            1 & \text{if } \alpha_{ijh} = 1 \text{ and } f_k(a_i) > f_k(a_j)\\
+            0 & otherwise
+        \end{cases}, \quad \mu_{ijhk} \in \{0, 1\}$
+        \item $\beta_{ijhl} = \begin{cases}
+            1 & \text{if } a_i \in r_h \text{ and } a_j \in r_l, i \neq j, h \neq l\\
+            0 & otherwise
+        \end{cases}, \quad \beta_{ijhl} \in \{0, 1\}$
+        \item $\nu_{ijhlk} = \begin{cases}
+            1 & \text{if } \beta_{ijhl} = 1 \text{ and } f_k(a_i) > f_k(a_j)\\
+            0 & otherwise
+        \end{cases}, \quad \nu_{ijhlk} \in \{0, 1\}$
     \end{enumerate}
 \end{document}
