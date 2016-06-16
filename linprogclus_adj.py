@@ -1,5 +1,6 @@
 from pulp import *
 from promethee import *
+from adjcluster import *
 import time
 import csv
 import pandas as pd
@@ -48,7 +49,7 @@ with open('shanghai.csv', newline='') as csvfile:
     content = csv.reader(csvfile, delimiter=',', quotechar='|')
     for row in content:
         eval_table.append(list(map(lambda x: float(x), row)))
-eval_table = eval_table[:10]
+eval_table = eval_table[:]
 
 # criteria = ['1', '2']
 # weights = [0.5, 0.5]
@@ -64,6 +65,7 @@ eval_table = eval_table[:10]
 # [10.2, 10.2]]
 
 uninetflows = uninetflows_eval(eval_table,criteria,weights,fctPrefCrit)
+netflows = rankingP2(eval_table, criteria, weights, fctPrefCrit)
 
 # uniposflows, uninegflows = uniflows_eval(candidats, criteres, init_weights, fctPrefCrit)
 
@@ -114,9 +116,9 @@ for i in alts:
             for k in crits:
                 gamma_comb.append((i,j,k))
 
-alpha = LpVariable.dicts("alpha",a_comb,cat="Binary")
+# alpha = LpVariable.dicts("alpha",a_comb,cat="Binary")
 a = LpVariable.dicts("z",a_comb,cat="Binary")
-gamma = LpVariable.dicts("gamma",gamma_comb,cat="Binary")
+# gamma = LpVariable.dicts("gamma",gamma_comb,cat="Binary")
 beta1 = LpVariable.dicts("beta1",gamma_comb,cat="Binary")
 beta2 = LpVariable.dicts("beta2",gamma_comb,cat="Binary")
 
@@ -124,32 +126,50 @@ beta2 = LpVariable.dicts("beta2",gamma_comb,cat="Binary")
 # obj_hom = []
 # obj_het = []
 obj = []
+gamma = []
 for i in alts:
+    gamma.append([[] for j in alts])
     for j in alts:
         if i != j:
+            gamma[i][j] = [0 for k in crits]
             for k in crits:
-                # obj.append((gamma[(i,j,k)]-beta2[(i,j,k)]) * weights[k])
-                obj.append(beta1[(i,j,k)] * weights[k])
+                if eval_table[i][k] > eval_table[j][k]:
+                    gamma[i][j][k] = 1
+                # obj.append((2*beta1[(i,j,k)] + beta2[(i,j,k)] - gamma[(i,j,k)]) * weights[k])
+                # obj.append((gamma[(i,j,k)]-beta1[(i,j,k)]-beta2[(i,j,k)])*weights[k])
+                # obj.append(beta1[(i,j,k)] * weights[k])
+                # obj.append((1-a[(i,j)]-a[(j,i)])*gamma[i][j][k]*weights[k])
+                obj.append(0.55*a[(i,j)]*gamma[i][j][k]*weights[k] + 0.45*(1-a[(i,j)]-a[(j,i)])*gamma[i][j][k]*weights[k])
 
 prob += lpSum(obj)
 
 # Constraints
+alpha = []
 for i in alts:
+    alpha.append([0 for j in alts])
+
     for j in alts:
         if i != j:
-            prob += a[(i,j)] + a[(j,i)] == 1
-            for k in crits:
-                prob += gamma[(i,j,k)] >= (eval_table[i][k]-eval_table[j][k])/M
-                prob += gamma[(i,j,k)] <= (eval_table[i][k]-eval_table[j][k])/M + 1 - EPS
-                prob += beta1[(i,j,k)] >= a[(i,j)] + gamma[(i,j,k)] - 1
-                prob += beta1[(i,j,k)] <= 0.5*(a[(i,j)] + gamma[(i,j,k)])
+
+            prob += a[(i,j)] + a[(j,i)] <= 1
+            # for k in crits:
+                # prob += gamma[(i,j,k)] >= (eval_table[i][k]-eval_table[j][k])/M
+                # prob += gamma[(i,j,k)] <= (eval_table[i][k]-eval_table[j][k])/M + 1 - EPS
+                # prob += beta1[(i,j,k)] >= a[(i,j)] + gamma[(i,j,k)] - 1
+                # prob += beta1[(i,j,k)] <= 0.5*(a[(i,j)] + gamma[(i,j,k)])
                 # prob += beta2[(i,j,k)] >= a[(j,i)] + gamma[(i,j,k)] - 1
                 # prob += beta2[(i,j,k)] <= 0.5*(a[(j,i)] + gamma[(i,j,k)])
 
-            prob += alpha[(i,j)] >= (netflow_eval(i,n,weights,gamma)-netflow_eval(j,n,weights,gamma))/M2
-            prob += alpha[(i,j)] <= (netflow_eval(i,n,weights,gamma)-netflow_eval(j,n,weights,gamma))/M2 + 1 - EPS
-            prob += alpha[(i,j)] <= a[(i,j)]
-            prob += alpha[(i,j)] + a[(i,j)] <= 2
+                # prob += beta1[(i,j,k)] >= a[(i,j)] + gamma[i][j][k] - 1
+                # prob += beta1[(i,j,k)] <= 0.5*(a[(i,j)] + gamma[i][j][k])
+                # prob += beta2[(i,j,k)] >= a[(j,i)] + gamma[i][j][k] - 1
+                # prob += beta2[(i,j,k)] <= 0.5*(a[(j,i)] + gamma[i][j][k])
+
+            if netflows[i] > netflows[j]:
+                alpha[i][j] = 1
+
+            prob += a[(i,j)] <= alpha[i][j]
+            # prob += alpha[i][j] + a[(i,j)] <= 2
 
 
 #print(prob)
@@ -166,6 +186,17 @@ print("Objective function:", value(prob.objective))
 print("Status:", LpStatus[prob.status])
 print("Time:", stop_time)
 
+adj = [[0 for i in alts] for i in alts]
+print("Adjacency matrix")
+for i in alts:
+    for j in alts:
+        if i != j:
+            adj[i][j] = int(a[(i,j)].varValue)
+    print(adj[i])
+
+clust_repart = adjToCluster(adj)
+print("Cluster repartition:",clust_repart)
+
 # clust_repart = []
 # f = open('clustering.m','w')
 # f.write("clusts = [ ")
@@ -181,20 +212,20 @@ print("Time:", stop_time)
 # f.write('};')
 # f.close()
 #
-# uninetflows.insert(0,criteria)
-# with open("uninetflows.csv", "w") as f:
-#     writer = csv.writer(f)
-#     writer.writerows(uninetflows)
-#
-# df = pd.io.parsers.read_csv('uninetflows.csv')
-# data = df[criteria]
-# # data = (data - data.mean()) / data.std()
-# pca = pcasvd(data, keepdim=0, demean=False)
-# colors = ['gbyrk'[i] for i in clust_repart]
-# plt.figure(1)
-# biplot(plt, pca, labels=data.index, colors=colors,
-#        xpc=1, ypc=2)
-# plt.show()
+uninetflows.insert(0,criteria)
+with open("uninetflows.csv", "w") as f:
+    writer = csv.writer(f)
+    writer.writerows(uninetflows)
+
+df = pd.io.parsers.read_csv('uninetflows.csv')
+data = df[criteria]
+# data = (data - data.mean()) / data.std()
+pca = pcasvd(data, keepdim=0, demean=False)
+colors = ['gbyrkgbyrkgbyrk'[i] for i in clust_repart]
+plt.figure(1)
+biplot(plt, pca, labels=data.index, colors=colors,
+       xpc=1, ypc=2)
+plt.show()
 
 # iter = 0
 # sols = []

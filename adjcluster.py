@@ -29,7 +29,7 @@ def adjToCluster(adj):
     for i in range(group_nb,-1,-1):
         a = [i for i, x in enumerate(mat[i]) if x != 0]
         for ind in a:
-            result[ind] = group_nb - i + 1
+            result[ind] = group_nb - i #+ 1
 
     return result
 
