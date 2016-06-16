@@ -93,6 +93,7 @@ prob = LpProblem("LPC",LpMaximize)
 
 # Constants
 M = 1e6
+M2 = 1e2
 N = 3 # Number of clusters
 EPS = 1e-6
 #init_weights = [0.1, 0.3, 0.6]
@@ -104,151 +105,96 @@ crits = range(m)
 clusts = range(N)
 
 # Variables
-c_comb = []
-for i in alts:
-    for h in clusts:
-        c_comb.append((i,h))
-c = LpVariable.dicts("c",c_comb,cat="Binary")
-
+a_comb = []
 gamma_comb = []
 for i in alts:
     for j in alts:
         if i != j:
+            a_comb.append((i,j))
             for k in crits:
                 gamma_comb.append((i,j,k))
+
+alpha = LpVariable.dicts("alpha",a_comb,cat="Binary")
+a = LpVariable.dicts("z",a_comb,cat="Binary")
 gamma = LpVariable.dicts("gamma",gamma_comb,cat="Binary")
-
-alpha_comb = []
-beta_comb = []
-for i in alts:
-    for j in alts:
-        if i != j:
-            for h in clusts:
-                alpha_comb.append((i,j,h))
-                for l in clusts:
-                    if l != h:
-                        beta_comb.append((i,j,h,l))
-alpha = LpVariable.dicts("alpha",alpha_comb,cat="Binary")
-beta = LpVariable.dicts("beta",beta_comb,cat="Binary")
-
-mu_comb = []
-nu_comb = []
-for i in alts:
-    for j in alts:
-        if i != j:
-            for h in clusts:
-                for k in crits:
-                    mu_comb.append((i,j,h,k))
-                    for l in clusts:
-                        if l != h:
-                            nu_comb.append((i,j,h,l,k))
-mu = LpVariable.dicts("mu",mu_comb,cat="Binary")
-nu = LpVariable.dicts("nu",nu_comb,cat="Binary")
+beta1 = LpVariable.dicts("beta1",gamma_comb,cat="Binary")
+beta2 = LpVariable.dicts("beta2",gamma_comb,cat="Binary")
 
 # Objective function
-obj_hom = []
-obj_het = []
+# obj_hom = []
+# obj_het = []
+obj = []
 for i in alts:
     for j in alts:
         if i != j:
             for k in crits:
-                for h in clusts:
-                    obj_hom.append(mu[(i,j,h,k)]*weights[k])
-                    for l in clusts:
-                        if l != h:
-                            obj_het.append(nu[i,j,h,l,k]*weights[k])
+                # obj.append((gamma[(i,j,k)]-beta2[(i,j,k)]) * weights[k])
+                obj.append(beta1[(i,j,k)] * weights[k])
 
-# prob += lpSum(obj_hom)+lpSum(obj_het)
-prob += lpSum(obj_het)-lpSum(obj_hom)
+prob += lpSum(obj)
 
 # Constraints
 for i in alts:
     for j in alts:
         if i != j:
+            prob += a[(i,j)] + a[(j,i)] == 1
             for k in crits:
                 prob += gamma[(i,j,k)] >= (eval_table[i][k]-eval_table[j][k])/M
                 prob += gamma[(i,j,k)] <= (eval_table[i][k]-eval_table[j][k])/M + 1 - EPS
-                for h in clusts[:-1]:
-                    prob += mu[(i,j,h,k)] >= alpha[(i,j,h)] + gamma[(i,j,k)] -1
-                    prob += mu[(i,j,h,k)] <= 0.5*(alpha[(i,j,h)] + gamma[(i,j,k)])
+                prob += beta1[(i,j,k)] >= a[(i,j)] + gamma[(i,j,k)] - 1
+                prob += beta1[(i,j,k)] <= 0.5*(a[(i,j)] + gamma[(i,j,k)])
+                # prob += beta2[(i,j,k)] >= a[(j,i)] + gamma[(i,j,k)] - 1
+                # prob += beta2[(i,j,k)] <= 0.5*(a[(j,i)] + gamma[(i,j,k)])
 
-                    prob += alpha[(i,j,h)] >= c[(i,h)] + c[(j,h)] - 1
-                    prob += alpha[(i,j,h)] <= 0.5*(c[i,h] + c[j,h])
-
-                    prob += nu[(i,j,h,h+1,k)] >= beta[(i,j,h,h+1)] + gamma[(i,j,k)] - 1
-                    prob += nu[(i,j,h,h+1,k)] <= 0.5*(beta[(i,j,h,h+1)] + gamma[(i,j,k)])
-
-                    prob += beta[(i,j,h,h+1)] >= c[(i,h)] + c[(j,h+1)] - 1
-                    prob += beta[(i,j,h,h+1)] <= 0.5*(c[(i,h)] + c[j,h+1])
-
-                    # for l in clusts:
-                    #     if l != h:
-                    #         prob += nu[(i,j,h,l,k)] >= beta[(i,j,h,l)] + gamma[(i,j,k)] - 1
-                    #         prob += nu[(i,j,h,l,k)] <= 0.5*(beta[(i,j,h,l)] + gamma[(i,j,k)])
-                    #
-                    #         prob += beta[(i,j,h,l)] >= c[(i,h)] + c[(j,l)] - 1
-                    #         prob += beta[(i,j,h,l)] <= 0.5*(c[(i,h)] + c[j,l])
+            prob += alpha[(i,j)] >= (netflow_eval(i,n,weights,gamma)-netflow_eval(j,n,weights,gamma))/M2
+            prob += alpha[(i,j)] <= (netflow_eval(i,n,weights,gamma)-netflow_eval(j,n,weights,gamma))/M2 + 1 - EPS
+            prob += alpha[(i,j)] <= a[(i,j)]
+            prob += alpha[(i,j)] + a[(i,j)] <= 2
 
 
-for k in crits:
-    for h in clusts[:-1]:
-        clust_ord_i = 0
-        clust_ord_j = 0
-        for i in alts:
-            for j in alts:
-                if j != i:
-                    clust_ord_i += beta[(i,j,h,h+1)]*eval_table[i][k]
-                    clust_ord_j += beta[(i,j,h,h+1)]*eval_table[j][k]
-        prob += clust_ord_i >= clust_ord_j + EPS
-
-for h in clusts:
-    prob += lpSum([c[(i,h)] for i in alts]) >= 1
-
-for i in alts:
-    prob += lpSum([c[i,h] for h in clusts]) == 1
 #print(prob)
 
-prob.writeLP("linprogclust.lp")
+prob.writeLP("linprogclust_adj.lp")
 start_time = time.time()
 prob.solve(GUROBI())
 stop_time = time.time() - start_time
 
 for v in prob.variables():
-    if 'c' in v.name:
+    if 'z' in v.name:
         print(v.name, "=", v.varValue)
 print("Objective function:", value(prob.objective))
 print("Status:", LpStatus[prob.status])
 print("Time:", stop_time)
 
-clust_repart = []
-f = open('clustering.m','w')
-f.write("clusts = [ ")
-for i in alts:
-    for h in clusts:
-        if c[(i,h)].varValue == 1:
-            clust_repart.append(h)
-            f.write(str(h) + '\n')
-f.write("];\n")
-f.write("criteria = {")
-for crit in criteria:
-    f.write("'" + crit + "' ")
-f.write('};')
-f.close()
-
-uninetflows.insert(0,criteria)
-with open("uninetflows.csv", "w") as f:
-    writer = csv.writer(f)
-    writer.writerows(uninetflows)
-
-df = pd.io.parsers.read_csv('uninetflows.csv')
-data = df[criteria]
-# data = (data - data.mean()) / data.std()
-pca = pcasvd(data, keepdim=0, demean=False)
-colors = ['gbyrk'[i] for i in clust_repart]
-plt.figure(1)
-biplot(plt, pca, labels=data.index, colors=colors,
-       xpc=1, ypc=2)
-plt.show()
+# clust_repart = []
+# f = open('clustering.m','w')
+# f.write("clusts = [ ")
+# for i in alts:
+#     for h in clusts:
+#         if c[(i,h)].varValue == 1:
+#             clust_repart.append(h)
+#             f.write(str(h) + '\n')
+# f.write("];\n")
+# f.write("criteria = {")
+# for crit in criteria:
+#     f.write("'" + crit + "' ")
+# f.write('};')
+# f.close()
+#
+# uninetflows.insert(0,criteria)
+# with open("uninetflows.csv", "w") as f:
+#     writer = csv.writer(f)
+#     writer.writerows(uninetflows)
+#
+# df = pd.io.parsers.read_csv('uninetflows.csv')
+# data = df[criteria]
+# # data = (data - data.mean()) / data.std()
+# pca = pcasvd(data, keepdim=0, demean=False)
+# colors = ['gbyrk'[i] for i in clust_repart]
+# plt.figure(1)
+# biplot(plt, pca, labels=data.index, colors=colors,
+#        xpc=1, ypc=2)
+# plt.show()
 
 # iter = 0
 # sols = []
