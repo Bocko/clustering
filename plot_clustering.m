@@ -1,4 +1,4 @@
-clustering_shanghai_20_4
+clustering
 uninetflows = csvread('uninetflows.csv',1,0);
 % [pc,score,latent,tsquare] = princomp(uninetflows);
 [pc, score] = pca(zscore(uninetflows));

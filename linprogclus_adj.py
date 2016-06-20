@@ -196,6 +196,16 @@ for i in alts:
 
 clust_repart = adjToCluster(adj)
 print("Cluster repartition:",clust_repart)
+f = open("clustering.m",'w')
+f.write("clusts = [ ")
+for val in clust_repart:
+    f.write(str(val) + '\n')
+f.write("];\n")
+f.write("criteria = {")
+for crit in criteria:
+    f.write("'" + crit + "' ")
+f.write('};')
+f.close()
 
 # clust_repart = []
 # f = open('clustering.m','w')
@@ -223,8 +233,7 @@ data = df[criteria]
 pca = pcasvd(data, keepdim=0, demean=False)
 colors = ['gbyrkgbyrkgbyrk'[i] for i in clust_repart]
 plt.figure(1)
-biplot(plt, pca, labels=data.index, colors=colors,
-       xpc=1, ypc=2)
+biplot(plt, pca, labels=data.index, colors=colors, xpc=1, ypc=2)
 plt.show()
 
 # iter = 0
