@@ -1,6 +1,7 @@
 from pulp import *
 from promethee import *
 from adjcluster import *
+import math
 import time
 import csv
 import pandas as pd
@@ -53,7 +54,7 @@ eval_table = eval_table[:]
 
 # criteria = ['1', '2']
 # weights = [0.5, 0.5]
-# fctPrefCrit = [PreferenceType2(0), PreferenceType2(0)]
+# fctPrefCrit = [PreferenceType2(0.3), PreferenceType2(0.3)]
 # eval_table = [[0, 0],
 # [0.1, 0.1],
 # [0.2, 0.2],
@@ -135,11 +136,21 @@ for i in alts:
             for k in crits:
                 if eval_table[i][k] > eval_table[j][k]:
                     gamma[i][j][k] = 1
+                # obj.append(0.51*a[(i,j)]*gamma[i][j][k]*weights[k] + 0.49*(1-a[(i,j)]-a[(j,i)])*gamma[i][j][k]*weights[k])
+
                 # obj.append((2*beta1[(i,j,k)] + beta2[(i,j,k)] - gamma[(i,j,k)]) * weights[k])
                 # obj.append((gamma[(i,j,k)]-beta1[(i,j,k)]-beta2[(i,j,k)])*weights[k])
                 # obj.append(beta1[(i,j,k)] * weights[k])
                 # obj.append((1-a[(i,j)]-a[(j,i)])*gamma[i][j][k]*weights[k])
-                obj.append(0.55*a[(i,j)]*gamma[i][j][k]*weights[k] + 0.45*(1-a[(i,j)]-a[(j,i)])*gamma[i][j][k]*weights[k])
+                # obj.append(-0.9*a[(i,j)]/(gamma[i][j][k]*weights[k]+EPS) - 0.1*(1-a[(i,j)]-a[(j,i)])/(gamma[i][j][k]*weights[k]+EPS))
+                # obj.append(0.7*a[(i,j)]*math.sqrt(uninetflows[i][k]**2+uninetflows[j][k]**2) + 0.3*(1-a[(i,j)]-a[(j,i)])*abs(uninetflows[i][k]-uninetflows[j][k]))
+                obj.append(0.51*a[(i,j)]*math.sqrt(gamma[i][j][k]*weights[k]) + 0.49*(1-a[(i,j)]-a[(j,i)])*math.sqrt(gamma[i][j][k]*weights[k]))
+
+# for i in alts:
+#     for j in alts:
+#         if i != j:
+#             for k in crits:
+#                 obj.append(0.63*a[(i,j)]*math.sqrt(gamma[i][j][k]**2+gamma[j][i][k]**2)*weights[k] + 0.37*(1-a[(i,j)]-a[(j,i)])*math.sqrt(gamma[i][j][k]**2+gamma[j][i][k]**2)*weights[k])
 
 prob += lpSum(obj)
 
@@ -174,25 +185,25 @@ for i in alts:
 
 #print(prob)
 
-prob.writeLP("linprogclust_adj.lp")
+# prob.writeLP("linprogclust_adj.lp")
 start_time = time.time()
 prob.solve(GUROBI())
 stop_time = time.time() - start_time
 
-for v in prob.variables():
-    if 'z' in v.name:
-        print(v.name, "=", v.varValue)
+# for v in prob.variables():
+#     if 'z' in v.name:
+#         print(v.name, "=", v.varValue)
 print("Objective function:", value(prob.objective))
 print("Status:", LpStatus[prob.status])
 print("Time:", stop_time)
 
 adj = [[0 for i in alts] for i in alts]
-print("Adjacency matrix")
+# print("Adjacency matrix")
 for i in alts:
     for j in alts:
         if i != j:
             adj[i][j] = int(a[(i,j)].varValue)
-    print(adj[i])
+    # print(adj[i])
 
 clust_repart = adjToCluster(adj)
 print("Cluster repartition:",clust_repart)
@@ -206,6 +217,7 @@ for crit in criteria:
     f.write("'" + crit + "' ")
 f.write('};')
 f.close()
+print("Clusters number:", max(clust_repart)+1)
 
 # clust_repart = []
 # f = open('clustering.m','w')
@@ -231,9 +243,11 @@ df = pd.io.parsers.read_csv('uninetflows.csv')
 data = df[criteria]
 # data = (data - data.mean()) / data.std()
 pca = pcasvd(data, keepdim=0, demean=False)
-colors = ['gbyrkgbyrkgbyrk'[i] for i in clust_repart]
+colors = ['kcgrbmykcgrbmykcgrbmykcgrbmykcgrbmykcgrbmykcgrbmykcgrbmykcgrbmykcgrbmykcgrbmykcgrbmy'[i] for i in clust_repart]
+labels = ['************************************************************************************'[i] for i in clust_repart]
 plt.figure(1)
-biplot(plt, pca, labels=data.index, colors=colors, xpc=1, ypc=2)
+# biplot(plt, pca, labels=data.index, colors=colors, xpc=1, ypc=2)
+biplot(plt, pca, labels=labels, colors=colors, xpc=1, ypc=2)
 plt.show()
 
 # iter = 0
